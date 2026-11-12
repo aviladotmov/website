@@ -209,7 +209,11 @@ header{position:relative}
 .card{position:absolute;left:0;top:0;transition:transform .32s var(--ease),opacity .2s;user-select:none;touch-action:none;cursor:grab;will-change:transform}
 .card.hidden{opacity:0;pointer-events:none}
 .card .ctop{display:flex;align-items:center;height:28px;gap:6px}
-.card .cn{font:500 10px/1 var(--mono);letter-spacing:.12em;color:var(--dim);flex:1}
+.card .cn{font:500 10px/1 var(--mono);letter-spacing:.12em;color:var(--dim);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:text}
+.card .cn .cnin{width:100%;background:#000;border:1px solid var(--accent);border-radius:4px;padding:3px 5px;font:500 10px/1 var(--mono);letter-spacing:.08em;color:var(--text);outline:none}
+.ihead input.inm{flex:1;min-width:0;background:transparent;border:1px solid transparent;border-radius:5px;padding:3px 5px;margin:-4px 0 -4px -6px;font:600 14px/1.1 var(--sans);color:var(--text);outline:none}
+.ihead input.inm:hover{border-color:var(--line2)}
+.ihead input.inm:focus{border-color:#555;background:#000}
 .card .du{font:500 10px/1 var(--mono);color:var(--dim)}
 .card.sel .du{color:var(--text)}
 .card .mute{position:absolute;left:6px;bottom:6px;z-index:2;font:600 9px/1 var(--mono);letter-spacing:.08em;padding:3px 5px;border-radius:3px;background:rgba(0,0,0,.65);color:var(--dim);display:none}
@@ -426,6 +430,13 @@ textarea.tin{min-height:56px}
 .hrec .hm{font:400 10px var(--mono);color:var(--dim)}
 .hrec .hw{font:400 11px var(--sans);color:var(--dim);white-space:nowrap}
 .hrecent .hint{padding:14px 6px}
+#homeRecov{margin:0 0 22px}
+#homeRecov .hrechead .lbl{color:var(--accent2)}
+.hrv{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;padding:10px 6px;border-bottom:1px solid var(--line)}
+.hrv .ht{width:64px;height:36px;border-radius:4px;background:#000 center/cover no-repeat;border:1px solid var(--line)}
+.hrv b{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hrv .hm{font:400 10px var(--mono);color:var(--dim)}
+.hrv .acts{display:flex;gap:6px}
 .hbtn{display:block;width:100%;text-align:left;padding:11px 14px;border:1px solid var(--line2);border-radius:7px;font:500 13px var(--sans);color:var(--text);background:var(--panel2)}
 .hbtn:hover{border-color:#555;background:#1a1a1a}
 .hbtn.primary{background:var(--accent);border-color:var(--accent);color:#000;font-weight:600}
@@ -609,7 +620,7 @@ textarea.tin{min-height:56px}
 <div id="dropov"></div>
 <div id="xmlmodal" class="ovl"><div class="mbox">
   <h3>Export XML</h3>
-  <p>For Premiere Pro or DaVinci Resolve. Keeps the cuts, slip, volume, framing and animations.</p>
+  <p>For Premiere Pro or DaVinci Resolve. Keeps the cuts, slip, volume, framing and animations. Each scene becomes a marker with its name and notes (shot, action, voice-over).</p>
   <label class="opt"><input type="radio" name="xo" value="copy" checked><div><b>Copy media too <em>(recommended)</em></b><span>Copies all files next to the XML, in a FOOTAGE folder. Makes relinking easy.</span></div></label>
   <label class="opt"><input type="radio" name="xo" value="xml"><div><b>XML only</b><span>You will need to relink every file by hand.</span></div></label>
   <p id="xmlwarn" style="color:var(--accent2);margin-top:10px"></p>
@@ -627,7 +638,7 @@ textarea.tin{min-height:56px}
 <div id="projdlg" class="ovl"><div class="mbox" style="width:min(620px,94vw);max-height:90vh;overflow:auto">
   <h3>Project settings</h3>
   <p>These apply to this project only and are saved with it.</p>
-  <div class="psec"><span class="lbl">Scene names</span>
+  <div class="psec"><span class="lbl">Default scene names</span><p class="hint" style="margin:-4px 0 12px">New and unrenamed scenes use this name. To rename one scene, double-click its name on the card, or edit it in the Inspector. Renamed scenes keep their names.</p>
     <div class="prow"><span class="hint">Name</span><input class="tin" id="pjLabel" type="text" placeholder="SCENE" spellcheck="false"><label class="chk" style="margin:0"><input type="checkbox" id="pjNum"> Number them (01, 02…)</label></div>
     <div class="prow"><span class="hint">Suggestions</span><div class="anchips" id="pjPresets"><button class="anchip" data-l="SCENE">SCENE</button><button class="anchip" data-l="CENA">CENA</button><button class="anchip" data-l="QUADRO">QUADRO</button><button class="anchip" data-l="FRAME">FRAME</button><button class="anchip" data-l="SHOT">SHOT</button><button class="anchip" data-l="PLANO">PLANO</button></div></div>
     <div class="prow"><span class="hint">Preview</span><span id="pjPrev"></span></div>
@@ -657,7 +668,8 @@ textarea.tin{min-height:56px}
     <div class="hbrand"><span class="dot"></span><b>ANIMATIC</b> MAKER <span class="hbeta">BETA</span><span class="hver" id="hVer"></span></div>
     <h2 class="hwelcome">Welcome</h2>
     <p class="hsub">From storyboard to animatic, in your browser. Nothing is uploaded: your files stay on your computer.</p>
-    <div class="hwarn"><b>Work in progress.</b> This app may have bugs. Save often and keep a copy of important projects (Export › Project with media).<br><br><b>About your files:</b> the project saves your scenes, notes and anything you make here (drawings, pasted images and GIFs, voice-overs). Imported videos and images <b>are not copied</b>. They stay where they are on your computer, and the project only saves their names. If you move or rename them, you will need to relink them.</div>
+    <div class="hwarn"><b>Work in progress.</b> This app may have bugs. It keeps an automatic recovery copy in this browser while you work, but still save your project (Ctrl+S) and keep a copy of important ones (Export › Project with media).<br><br><b>About your files:</b> the project saves your scenes, notes and anything you make here (drawings, pasted images and GIFs, voice-overs). Imported videos and images <b>are not copied</b>. They stay where they are on your computer, and the project only saves their names. If you move or rename them, you will need to relink them.</div>
+    <div id="homeRecov"></div>
     <div class="hrechead"><span class="lbl">Recent</span></div>
     <div id="homeRecent" class="hrecent"></div>
   </div>
@@ -2659,8 +2671,8 @@ if (LANG !== 'en') document.addEventListener('DOMContentLoaded', () => {
     .observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['title', 'placeholder'] });
 });
 /* versão e novidades da tela inicial: atualize a cada entrega (só features novas; "Bugs fixed" fecha a lista) */
-const APP_VERSION = 'v0.3', APP_BUILD = '261111';
-const APP_NEWS = ['Paste animated GIFs from the web', 'Import PNG sequence', 'Clean view in storyboard panel', 'Project settings for storyboard PDF', 'Bugs fixed'];
+const APP_VERSION = 'v0.4', APP_BUILD = '261112';
+const APP_NEWS = ['Autosave with recovery on the start screen', 'Rename any scene: double-click its name', 'XML: each scene becomes a marker with its notes', 'Bugs fixed'];
 const $ = (s, r = document) => r.querySelector(s);
 const ICO_P = {"plus": "<path d=\"M8 3v10M3 8h10\"/>", "file": "<path d=\"M9.5 1.8H4.2a1 1 0 0 0-1 1v10.4a1 1 0 0 0 1 1h7.6a1 1 0 0 0 1-1V5.1z\"/><path d=\"M9.3 1.8v3.5h3.5\"/><path d=\"M8 7.5v4.4M5.8 9.7h4.4\"/>", "folder": "<path d=\"M1.8 4V12.6a.8.8 0 0 0 .8.8h10.8a.8.8 0 0 0 .8-.8V5.4a.8.8 0 0 0-.8-.8H7.6L6.2 2.8H2.6a.8.8 0 0 0-.8.8z\"/><path d=\"M8 7v4.2M5.9 9.1h4.2\"/>", "board": "<rect x=\"1.8\" y=\"2.5\" width=\"5.4\" height=\"4.4\" rx=\".8\"/><rect x=\"8.8\" y=\"2.5\" width=\"5.4\" height=\"4.4\" rx=\".8\"/><rect x=\"1.8\" y=\"9.1\" width=\"5.4\" height=\"4.4\" rx=\".8\"/><rect x=\"8.8\" y=\"9.1\" width=\"5.4\" height=\"4.4\" rx=\".8\"/>", "notes": "<rect x=\"2\" y=\"2\" width=\"12\" height=\"7\" rx=\"1\"/><path d=\"M2.5 11.5h11M2.5 14h7\"/>", "slip": "<rect x=\"4\" y=\"4\" width=\"8\" height=\"8\" rx=\"1\"/><path d=\"M1.5 8h2M12.5 8h2M2.8 6.5L1.3 8l1.5 1.5M13.2 6.5l1.5 1.5-1.5 1.5\"/>", "close": "<path d=\"M4 4l8 8M12 4l-8 8\"/>", "export": "<rect x=\"1.8\" y=\"3\" width=\"12.4\" height=\"10\" rx=\"1.4\"/><path d=\"M6.5 6v4l3.5-2z\" fill=\"currentColor\"/>", "lock": "<rect x=\"3\" y=\"7\" width=\"10\" height=\"7\" rx=\"1.3\"/><path d=\"M5.3 7V5.2a2.7 2.7 0 0 1 5.4 0V7\"/>", "unlock": "<rect x=\"3\" y=\"7\" width=\"10\" height=\"7\" rx=\"1.3\"/><path d=\"M5.3 7V5.2a2.7 2.7 0 0 1 5.2-1\"/>", "speaker": "<path d=\"M2.5 6.2h2.6L8.6 3v10L5.1 9.8H2.5z\"/><path d=\"M11 5.5a3.5 3.5 0 0 1 0 5M12.8 3.8a6 6 0 0 1 0 8.4\"/>", "mute": "<path d=\"M2.5 6.2h2.6L8.6 3v10L5.1 9.8H2.5z\"/><path d=\"M11 6l3.5 4M14.5 6L11 10\"/>", "cut": "<circle cx=\"4\" cy=\"11.8\" r=\"2\"/><circle cx=\"12\" cy=\"11.8\" r=\"2\"/><path d=\"M5.4 10.4L12 2.5M10.6 10.4L4 2.5\"/>", "pen": "<path d=\"M10.8 2.3l2.9 2.9L5.8 13.1H2.9v-2.9z\"/><path d=\"M9.3 3.8l2.9 2.9\"/>", "penplus": "<path d=\"M9.8 3.3l2.9 2.9L5.8 13.1H2.9v-2.9z\"/><path d=\"M12.8 1.2v3.6M11 3h3.6\"/>", "redist": "<path d=\"M1.8 3v10M14.2 3v10\"/><rect x=\"4\" y=\"6\" width=\"3\" height=\"4\" rx=\".6\"/><rect x=\"9\" y=\"6\" width=\"3\" height=\"4\" rx=\".6\"/>", "fit": "<path d=\"M2 8h12M2 8l2.5-2.5M2 8l2.5 2.5M14 8l-2.5-2.5M14 8l-2.5 2.5\"/>", "reset": "<path d=\"M2.8 5.2A5.5 5.5 0 1 1 2.5 9\"/><path d=\"M2.4 2.2v3.2h3.2\"/>", "open": "<path d=\"M1.8 12.8V3.6a.8.8 0 0 1 .8-.8h3.6l1.4 1.8h5.4a.8.8 0 0 1 .8.8V6.5\"/><path d=\"M1.8 12.8l2-5.4a.8.8 0 0 1 .7-.5h9.2a.6.6 0 0 1 .6.8l-1.8 5.1H1.8z\"/>", "save": "<path d=\"M2.5 2.5h9l2 2v9h-11z\"/><path d=\"M5 2.5v3.5h5V2.5M5 13.5V9.5h6v4\"/>", "pdf": "<path d=\"M9.5 1.8H4.2a1 1 0 0 0-1 1v10.4a1 1 0 0 0 1 1h7.6a1 1 0 0 0 1-1V5.1z\"/><path d=\"M9.3 1.8v3.5h3.5\"/><path d=\"M5.5 9h5M5.5 11.3h3.5\"/>", "xml": "<path d=\"M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5M9 3l-2 10\"/>", "pkg": "<path d=\"M8 1.8l5.6 3v6.4L8 14.2l-5.6-3V4.8z\"/><path d=\"M2.4 4.8L8 7.8l5.6-3M8 7.8v6.4\"/>", "film": "<rect x=\"2\" y=\"2.5\" width=\"12\" height=\"11\" rx=\"1.4\"/><path d=\"M5 2.5v11M11 2.5v11M2 5.5h3M2 8h3M2 10.5h3M11 5.5h3M11 8h3M11 10.5h3\"/>", "gear": "<circle cx=\"8\" cy=\"8\" r=\"2.2\"/><path d=\"M8 1.8v1.7M8 12.5v1.7M1.8 8h1.7M12.5 8h1.7M3.6 3.6l1.2 1.2M11.2 11.2l1.2 1.2M3.6 12.4l1.2-1.2M11.2 4.8l1.2-1.2\"/>", "info": "<circle cx=\"8\" cy=\"8\" r=\"6.2\"/><path d=\"M8 7.2v4M8 4.8v.1\"/>", "seq": "<rect x=\"1.8\" y=\"4\" width=\"5\" height=\"8\" rx=\".8\"/><rect x=\"9.2\" y=\"4\" width=\"5\" height=\"8\" rx=\".8\"/><path d=\"M7.4 8h1.2\"/>", "relink": "<path d=\"M6.8 9.2a2.6 2.6 0 0 0 3.7 0l2.4-2.4a2.6 2.6 0 0 0-3.7-3.7l-.9.9\"/><path d=\"M9.2 6.8a2.6 2.6 0 0 0-3.7 0L3.1 9.2a2.6 2.6 0 0 0 3.7 3.7l.9-.9\"/>"};
 const ico = k => `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${ICO_P[k] || ''}</svg>`;
@@ -2738,8 +2750,30 @@ function newScene(mid) {
 /* ---------------- storyboard: notas, card vazio, distribuição de tempo ---------------- */
 /* nome das cenas: configurável no projeto (padrão SCENE 01, 02…); pode ser outro nome e sem número */
 const SL = () => S.sceneLabel || { text: 'SCENE', num: true };
-function sceneName(i) { const l = SL(), t = String(l.text || '').trim(), n = l.num !== false ? p2(i + 1) : ''; return [t, n].filter(Boolean).join(' ') || p2(i + 1); }
-function sceneShort(i) { const l = SL(), t = String(l.text || '').trim(); return l.num !== false ? t.charAt(0).toUpperCase() + p2(i + 1) : (t.slice(0, 10) || p2(i + 1)); }
+/* cada cena pode ter um nome próprio (sc.name), livre: "Intro", "cena ext"… Sem nome próprio, vale o nome automático (padrão + número pela posição). */
+const customName = i => { const sc = S.scenes[i]; return sc && typeof sc.name === 'string' && sc.name.trim() ? sc.name.trim() : ''; };
+function autoName(i) { const l = SL(), t = String(l.text || '').trim(), n = l.num !== false ? p2(i + 1) : ''; return [t, n].filter(Boolean).join(' ') || p2(i + 1); }
+function sceneName(i) { return customName(i) || autoName(i); }
+function sceneShort(i) { const c = customName(i); if (c) return c; const l = SL(), t = String(l.text || '').trim(); return l.num !== false ? t.charAt(0).toUpperCase() + p2(i + 1) : (t.slice(0, 10) || p2(i + 1)); }
+function renameScene(sc, name) {
+  const v = String(name || '').replace(/\s+/g, ' ').trim().slice(0, 60), i = S.scenes.indexOf(sc); if (i < 0) return;
+  const cur = customName(i);
+  if (v === cur || (!cur && v === autoName(i))) return; // nada mudou (manter o nome automático não cria nome fixo)
+  pushUndo(); if (v) sc.name = v; else delete sc.name; renderAll();
+}
+/* edição do nome direto no card (duplo clique no nome) */
+function editCardName(sc, el) {
+  const cn = el.querySelector('.cn'); if (!cn || el._renaming) return;
+  el._renaming = true; const i = S.scenes.indexOf(sc);
+  cn.innerHTML = ''; const inp = document.createElement('input'); inp.className = 'cnin'; inp.value = sceneName(i); inp.spellcheck = false; inp.maxLength = 60;
+  inp.placeholder = autoName(i); inp.title = 'Enter to save · Esc to cancel · leave empty to go back to the automatic name';
+  cn.appendChild(inp); inp.focus(); inp.select();
+  let done = false;
+  const end = ok => { if (done) return; done = true; el._renaming = false; const v = inp.value; cn.textContent = sceneName(S.scenes.indexOf(sc)); if (ok) renameScene(sc, v); else renderBoard(); };
+  inp.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') end(true); if (e.key === 'Escape') end(false); };
+  inp.onblur = () => end(true);
+  inp.onpointerdown = e => e.stopPropagation(); inp.ondblclick = e => e.stopPropagation();
+}
 const NO_NOTES = { plano: '', acao: '', loc: '' };
 const nOf = sc => sc.notes || NO_NOTES;
 const isBlank = v => !!v && v.media == null;
@@ -2828,8 +2862,8 @@ function drawSlate(c, W, H, sc) {
 
 /* ---------------- undo ---------------- */
 const undoS = [], redoS = [];
-function pushUndo() { undoS.push(JSON.stringify(S)); if (undoS.length > 200) undoS.shift(); redoS.length = 0; if (!dirty) setDirty(true); }
-function restore(json) { S = JSON.parse(json); if (sel && !(sel.type === 'scene' ? findScene(sel.id) : findClip(sel.id))) sel = null; applyFormat(); renderAll(); }
+function pushUndo() { undoS.push(JSON.stringify(S)); if (undoS.length > 200) undoS.shift(); redoS.length = 0; if (!dirty) setDirty(true); else scheduleAutosave(); }
+function restore(json) { S = JSON.parse(json); if (!dirty) setDirty(true); else scheduleAutosave(); if (sel && !(sel.type === 'scene' ? findScene(sel.id) : findClip(sel.id))) sel = null; applyFormat(); renderAll(); }
 function undo() { if (!undoS.length) return; redoS.push(JSON.stringify(S)); restore(undoS.pop()); restartIfPlaying(); }
 function redo() { if (!redoS.length) return; undoS.push(JSON.stringify(S)); restore(redoS.pop()); restartIfPlaying(); }
 
@@ -3160,7 +3194,7 @@ function renderBoard() {
       const [x, y] = cellXY(k, g); el.style.transform = `translate(${x}px,${y}px)`;
       inner.appendChild(el); boardEls.set(sc.id, el);
       el.addEventListener('pointerdown', e => onCardDown(e, sc.id));
-      el.addEventListener('dblclick', e => { if (e.target.closest('.vsel')) return; const s = findScene(sc.id); if (!s) return; if (canDraw(s)) { openSceneBuilder(s); return; } seek(startOf(s)); play(); });
+      el.addEventListener('dblclick', e => { if (e.target.closest('.vsel') || e.target.closest('.cnin')) return; if (e.target.closest('.cn')) { const s = findScene(sc.id); if (s) editCardName(s, el); return; } const s = findScene(sc.id); if (!s) return; if (canDraw(s)) { openSceneBuilder(s); return; } seek(startOf(s)); play(); });
       el.querySelector('.vsel').addEventListener('pointerdown', e => e.stopPropagation());
       el.querySelector('.vsel').addEventListener('click', e => { e.stopPropagation(); openVMenu(sc.id, e.currentTarget); });
     }
@@ -3168,7 +3202,7 @@ function renderBoard() {
     const v = activeV(sc), m = M.get(v.media); const i = S.scenes.indexOf(sc);
     el.style.width = g.cw + 'px';
     el.querySelector('.th').style.height = g.th + 'px';
-    el.querySelector('.cn').textContent = sceneName(i);
+    if (!el._renaming) { const cn = el.querySelector('.cn'), nm = sceneName(i); if (cn.textContent !== nm) cn.textContent = nm; cn.title = customName(i) ? `Renamed (automatic: ${autoName(i)}). Double-click to rename.` : 'Double-click to rename'; }
     const vs = el.querySelector('.vsel'); vs.querySelector('span').textContent = `V${sc.versions.indexOf(v) + 1}${sc.versions.length > 1 ? '/' + sc.versions.length : ''}`; vs.classList.toggle('multi', sc.versions.length > 1);
     const img = el.querySelector('img'); const tu = m ? thumbFor(m.id, v.in) : '';
     if (img.getAttribute('src') !== tu) { if (tu) img.src = tu; else img.removeAttribute('src'); }
@@ -3355,7 +3389,7 @@ function renderInspector() {
     const maxIn = isVid ? Math.max(0, m.duration - 1 / FPS) : 0;
     b.innerHTML = `
       <div class="isec">
-        <div class="ihead"><b>${esc(sceneName(i))}</b><span>V${sc.versions.indexOf(v) + 1} of ${sc.versions.length}</span></div>
+        <div class="ihead"><input class="inm" id="iName" value="${esc(sceneName(i))}" placeholder="${esc(autoName(i))}" maxlength="60" spellcheck="false" title="Scene name. Leave empty to go back to the automatic name (${esc(autoName(i))})."><span>V${sc.versions.indexOf(v) + 1} of ${sc.versions.length}</span></div>
         <div class="vchips">${sc.versions.map((x, k) => { const mm = M.get(x.media); const tu = mm ? thumbFor(mm.id, x.in) : ''; return `<button class="vchip${x.id === sc.active ? ' on' : ''}" data-vid="${x.id}" title="${esc(mm ? mm.name : '')}"><i style="${tu ? `background-image:url(${tu})` : ''}"></i>V${k + 1}${sc.versions.length > 1 ? '<span class="x" title="Remove version">×</span>' : ''}</button>`; }).join('')}<button class="vchip add" id="iAddVer" title="Add a version (or drop a file on the scene, or copy an image and press Ctrl+Shift+V)">+</button></div>
         ${canDraw(sc, v) || sc.fromBlank ? `<div class="irow" style="margin:10px 0 0;gap:6px">${canDraw(sc, v) ? `<button class="btn primary" id="iDraw">${ico('pen')}${v.drawing ? 'Edit drawing' : 'Draw scene'}</button>` : ''}${!isBlank(v) ? `<button class="btn" id="iDrawNew" title="Creates a new drawn version of this scene${v.drawing ? ', starting from the current drawing' : ''}">${ico('penplus')}New drawing</button>` : ''}</div>` : ''}
       </div>
@@ -3388,6 +3422,9 @@ function renderInspector() {
       el.oninput = () => { if (first) { pushUndo(); first = false; } if (!sc.notes) sc.notes = { plano: '', acao: '', loc: '' }; sc.notes[key] = el.value; renderBoard(); renderTimeline(); drawPreview(); };
       el.onblur = () => setTimeout(() => { const ae = document.activeElement; if (!(ae && $('#inspbody').contains(ae) && ae.matches('.tin'))) renderInspector(); }, 0); };
     editN('nPlano', 'plano'); editN('nAcao', 'acao'); editN('nLoc', 'loc');
+    { const nm = $('#iName'); let esc0 = false;
+      nm.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') nm.blur(); if (e.key === 'Escape') { esc0 = true; nm.blur(); } };
+      nm.onblur = () => { const val = nm.value; if (esc0) { esc0 = false; nm.value = sceneName(S.scenes.indexOf(sc)); setTimeout(renderInspector, 0); return; } renameScene(sc, val); setTimeout(renderInspector, 0); }; }
     $('#iLock').onclick = () => { pushUndo(); sc.lock = !sc.lock; renderAll(); };
     { const d1 = $('#iDraw'), d2 = $('#iDrawNew'); if (d1) d1.onclick = () => openSceneBuilder(sc, 'edit'); if (d2) d2.onclick = () => openSceneBuilder(sc, 'new'); }
     const dI = $('#iDur'); dI.onchange = () => { const val = parseFloat(dI.value); if (!(val > 0)) return; pushUndo(); withSync(() => { sc.dur = Math.max(1 / FPS, snapF(val)); }); dI.blur(); renderAll(); restartIfPlaying(); };
@@ -3517,7 +3554,7 @@ function onCardDown(e, sid) {
         if (Math.hypot(ev.clientX - x0, ev.clientY - y0) < 5) return;
         started = true; closeVMenu();
         const v = activeV(sc), g = BL; const w = Math.min(g.cw, 220), h = Math.round(w * g.th / g.cw);
-        ghost = makeGhost(thumbFor(v.media, v.in), `${sceneName(S.scenes.indexOf(sc))} · ARRASTANDO`, w, h);
+        ghost = makeGhost(thumbFor(v.media, v.in), `${sceneName(S.scenes.indexOf(sc))} · DRAGGING`, w, h);
         DS.sceneId = sc.id; DS.slotDur = sc.dur;
       }
       moveGhost(ghost, ev);
@@ -3563,7 +3600,7 @@ function onBlkDown(e, sid) {
           d = Math.max(d, 1 / FPS - oA); d = Math.min(d, oB - 1 / FPS);
           if (mb && mb.kind === 'video') d = Math.max(d, -oIn);
           A.dur = snapF(oA + d); B.dur = snapF(oB - d); if (mb && mb.kind === 'video') vb.in = snapF(oIn + d);
-          tip(ev, `ROLL · C${p2(S.scenes.indexOf(A) + 1)} ${fmtS(A.dur)} | C${p2(S.scenes.indexOf(B) + 1)} ${fmtS(B.dur)}`);
+          tip(ev, `ROLL · ${sceneShort(S.scenes.indexOf(A))} ${fmtS(A.dur)} | ${sceneShort(S.scenes.indexOf(B))} ${fmtS(B.dur)}`);
           renderTimeline(); seekQuiet(startOf(B));
         },
         up() { tip(); $('#tl').classList.remove('noanim'); renderAll(); restartIfPlaying(); }
@@ -3598,7 +3635,7 @@ function onBlkDown(e, sid) {
       move(ev) {
         if (!changed) { pushUndo(); changed = true; }
         v.in = clamp(snapF(orig.in - (ev.clientX - x0) / pps), 0, maxIn);
-        tip(ev, `SLIP · entrada ${fmtS(v.in)}${shortage(sc) > 0.01 ? ' · faltam ' + fmtS(shortage(sc)) : ''}`);
+        tip(ev, `SLIP · in ${fmtS(v.in)}${shortage(sc) > 0.01 ? ' · ' + fmtS(shortage(sc)) + ' short' : ''}`);
         renderTimeline(); seekQuiet(startOf(sc));
       },
       up() { tip(); renderAll(); restartIfPlaying(); }
@@ -3612,7 +3649,7 @@ function onBlkDown(e, sid) {
         if (Math.hypot(ev.clientX - x0, ev.clientY - y0) < 5) return;
         started = true; DS.sceneId = sc.id; DS.slotDur = sc.dur;
         const w = 150, h = S.format === '9:16' ? 200 : 84;
-        ghost = makeGhost(thumbFor(v.media, v.in), `${sceneName(S.scenes.indexOf(sc))} · ARRASTANDO`, w, h);
+        ghost = makeGhost(thumbFor(v.media, v.in), `${sceneName(S.scenes.indexOf(sc))} · DRAGGING`, w, h);
       }
       moveGhost(ghost, ev);
       const rest = S.scenes.filter(s => s !== sc);
@@ -3991,7 +4028,7 @@ async function exportMP4() {
       await aenc.flush(); aenc.close(); if (err) throw err;
     }
     muxer.finalize();
-    progress(1, 'Pronto');
+    progress(1, 'Done');
     const blob = new Blob([muxer.target.buffer], { type: 'video/mp4' });
     modal(true, 'Video ready', `${(blob.size / 1048576).toFixed(1)} MB · ${tc(tot)}. Confirm the download.`);
     await saveFile(fileBase() + '.mp4', blob);
@@ -4172,12 +4209,53 @@ const idb = (() => {
   const tx = async (mode, fn) => { const db = await open(); return new Promise((res, rej) => { const t = db.transaction('kv', mode); const q = fn(t.objectStore('kv')); t.oncomplete = () => res(q && q.result); t.onerror = () => rej(t.error); }); };
   return { get: k => tx('readonly', st => st.get(k)).catch(() => null), set: (k, v) => tx('readwrite', st => st.put(v, k)).catch(() => null) };
 })();
-function setDirty(v) { dirty = v; if (!v) savedOnce = true; renderSaveState(); }
+function setDirty(v) { dirty = v; if (!v) savedOnce = true; else scheduleAutosave(); renderSaveState(); }
+/* ---------------- autosave: cópia de recuperação no navegador (IndexedDB), uma por projeto ----------------
+   Guarda o mesmo conteúdo do Ctrl+S (projeto + mídias criadas aqui). Imported files continuam só referenciados.
+   Some quando o projeto é salvo ou fechado sem salvar; se a aba cair, aparece na tela inicial para recuperar. */
+let autoAt = 0, autoSig = '', autoBusy = false, autoT = 0;
+const AUTOSAVE_MS = 20000;
+function scheduleAutosave(ms = AUTOSAVE_MS) { clearTimeout(autoT); autoT = setTimeout(autosave, ms); }
+async function recovList() { return (await idb.get('recov')) || []; }
+async function clearRecovery(pid) {
+  if (!pid) return; const l = await recovList();
+  if (l.some(r => r.pid === pid)) { await idb.set('recov', l.filter(r => r.pid !== pid)); await idb.set('recovblob:' + pid, null); }
+}
+async function autosave() {
+  if (!dirty || autoBusy || REC || SB || exporting() || (!S.scenes.length && !M.size)) { if (dirty) scheduleAutosave(); return; }
+  if (!S.pid) S.pid = uid();
+  const sig = JSON.stringify(S) + '|' + M.size; if (sig === autoSig) return;
+  autoBusy = true;
+  try {
+    const { blob } = await buildProjectBlob(false), pid = S.pid;
+    await idb.set('recovblob:' + pid, blob);
+    let l = (await recovList()).filter(r => r.pid !== pid);
+    l.unshift({ pid, name: S.name || 'Untitled', at: Date.now(), scenes: S.scenes.length, dur: total(), fmt: S.format, thumb: projThumb(), file: projHandle ? projHandle.name : null });
+    for (const r of l.slice(5)) await idb.set('recovblob:' + r.pid, null);
+    await idb.set('recov', l.slice(0, 5));
+    autoSig = sig; autoAt = Date.now(); renderSaveState();
+  } catch (e) { console.warn('autosave', e); }
+  finally { autoBusy = false; }
+}
+const exporting = () => $('#modal').classList.contains('show');
+document.addEventListener('visibilitychange', () => { if (document.hidden && dirty) autosave(); });
+window.addEventListener('pagehide', () => { if (dirty) autosave(); });
+async function recoverProject(r) {
+  const blob = await idb.get('recovblob:' + r.pid);
+  if (!blob) { toast('This recovery copy is no longer available.'); await clearRecovery(r.pid); showHome(); return; }
+  hideHome();
+  await openProjectFile(new File([blob], (r.name || 'Untitled') + PROJ_EXT), null);
+  if (!S.pid) S.pid = r.pid;
+  try { const h = await idb.get('ph:' + r.pid); if (h && h.kind === 'file') projHandle = h; } catch (e) { }
+  autoAt = r.at; setDirty(true);
+  toast(`Recovered “${r.name}” from ${ago(r.at)}. Press Ctrl+S to save it${projHandle ? ` to “${projHandle.name}”` : ''}.`, 6000);
+}
 function renderSaveState() {
   const el = $('#savestate'); if (!el) return;
   if (!S.scenes.length && !M.size) { el.textContent = ''; return; }
   const un = dirty || !savedOnce;
-  el.textContent = un ? '● unsaved' : (projHandle ? `saved · ${projHandle.name}` : projDir ? `saved · ${projDir.name}` : 'saved');
+  el.textContent = un ? '● unsaved' + (autoAt ? ` · autosaved ${new Date(autoAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}` : '') : (projHandle ? `saved · ${projHandle.name}` : projDir ? `saved · ${projDir.name}` : 'saved');
+  el.title = un ? (autoAt ? 'Not saved to your project file yet. A recovery copy is kept in this browser: if the tab closes or crashes, you can recover it from the start screen. Press Ctrl+S to save.' : 'Not saved yet. Press Ctrl+S.') : '';
   el.classList.toggle('dirty', un);
 }
 async function ensurePerm(h) {
@@ -4214,15 +4292,16 @@ async function saveProject(opts = {}) {
   const { blob } = await buildProjectBlob(false);
   if (fileOK) {
     try {
+      if (projHandle && !opts.saveAs && !(await ensurePerm(projHandle))) projHandle = null;
       if (!projHandle || opts.saveAs) projHandle = await window.showSaveFilePicker({ suggestedName: fileBase() + PROJ_EXT, types: PROJ_TYPES, id: 'animatic-proj' });
       await writeHandle(projHandle, blob); projDir = null;
-      setDirty(false); addRecent(recentEntry('file'));
+      setDirty(false); addRecent(recentEntry('file')); clearRecovery(S.pid); autoAt = 0; autoSig = '';
       const ext = [...M.values()].filter(m => !S.hidden.includes(m.id) && !m.pasted && !m.offline).length;
       toast(`Saved to “${projHandle.name}”.${ext ? ` ${ext} imported file${ext > 1 ? 's are' : ' is'} still on your computer, outside the project. Keep ${ext > 1 ? 'them' : 'it'} in place.` : ''}`, ext ? 5000 : 2000);
     } catch (e) { if (e && e.name === 'AbortError') return; console.error(e); toast('Could not save the file: ' + (e && e.message || e), 5000); }
     return;
   }
-  if (await saveFile(fileBase() + PROJ_EXT + (inFrame ? '.zip' : ''), blob)) { setDirty(false); addRecent(recentEntry('zip')); }
+  if (await saveFile(fileBase() + PROJ_EXT + (inFrame ? '.zip' : ''), blob)) { setDirty(false); addRecent(recentEntry('zip')); clearRecovery(S.pid); autoAt = 0; autoSig = ''; }
 }
 async function exportProjectFull() {
   pause(); modal(true, 'Export project with media', 'Packing the project and all media into one file…'); $('#mCancel').style.display = 'none'; progress(0.3);
@@ -4276,7 +4355,7 @@ async function loadProjectData(P) {
   M.clear();
   for (const x of P.media || []) M.set(x.id, { ...x, duration: x.duration == null ? Infinity : x.duration, offline: true, thumbs: new Map() });
   const { media, savedAt, sbAssets, stbImgs, ...rest } = P; S = Object.assign(newProject(), rest); PROJ_ASSETS = sbAssets || {}; STB_IMGS = stbImgs || {};
-  undoS.length = 0; redoS.length = 0; sel = null; playhead = 0;
+  undoS.length = 0; redoS.length = 0; sel = null; playhead = 0; autoAt = 0; autoSig = ''; clearTimeout(autoT);
   $('#pname').value = S.name; applyFormat(); renderAll();
   return true;
 }
@@ -4373,8 +4452,18 @@ function ago(t) {
   if (m < 1) return 'just now'; if (m < 60) return `${m} min ago`; const h = Math.round(m / 60); if (h < 24) return `${h} h ago`;
   const d = Math.round(h / 24); if (d === 1) return 'yesterday'; if (d < 7) return `${d} days ago`; return fmtDate(t);
 }
+async function renderHomeRecov() {
+  const box = $('#homeRecov'), l = await recovList();
+  if (!l.length) { box.innerHTML = ''; return; }
+  box.innerHTML = `<div class="hrechead"><span class="lbl">Unsaved work · recovered automatically</span></div>` + l.map((r, i) => `<div class="hrv"><span class="ht" style="${r.thumb ? `background-image:url(${r.thumb})` : ''}"></span><span style="min-width:0"><b>${esc(r.name)}</b><span class="hm">${r.scenes} scene${r.scenes === 1 ? '' : 's'} · ${fmtS(r.dur || 0)} · autosaved ${ago(r.at)}${r.file ? ` · ${esc(r.file)}` : ''}</span></span><span class="acts"><button class="btn primary" data-rec="${i}">Recover</button><button class="btn" data-recx="${i}" title="Delete this recovery copy">Discard</button></span></div>`).join('');
+  box.querySelectorAll('[data-rec]').forEach(b => b.onclick = () => recoverProject(l[+b.dataset.rec]));
+  box.querySelectorAll('[data-recx]').forEach(b => b.onclick = async () => {
+    if (!b.dataset.sure) { b.dataset.sure = '1'; b.textContent = 'Delete?'; setTimeout(() => { if (b.isConnected) { delete b.dataset.sure; b.textContent = 'Discard'; } }, 2500); return; }
+    await clearRecovery(l[+b.dataset.recx].pid); renderHomeRecov();
+  });
+}
 async function showHome() {
-  const h = $('#home'); h.classList.add('show');
+  const h = $('#home'); h.classList.add('show'); renderHomeRecov();
   const list = ((await idb.get('recents')) || []);
   const box = $('#homeRecent');
   box.innerHTML = list.length ? list.map((r, i) => `<button class="hrec" data-r="${i}" title="${r.file || r.dir || r.hasHandle ? 'Reopen the project' : 'Choose the file to open'}"><span class="ht${r.fmt === '9:16' ? ' v' : ''}" style="${r.thumb ? `background-image:url(${r.thumb})` : ''}"></span><span style="min-width:0"><b>${esc(r.name)}</b><span class="hm">${r.scenes} scene${r.scenes === 1 ? '' : 's'} · ${fmtS(r.dur || 0)} · ${r.fmt || '16:9'}${r.kind === 'folder' ? ' · folder' : ''}</span></span><span class="hw">${ago(r.at)}</span></button>`).join('') : '<div class="hint">Projects you save will show up here.</div>';
@@ -4393,7 +4482,7 @@ function resetProject() {
   pause(); if (REC) stopRec(true); micRelease();
   for (const m of M.values()) if (m.url) URL.revokeObjectURL(m.url);
   M.clear(); S = newProject(); PROJ_ASSETS = {}; STB_IMGS = {}; undoS.length = 0; redoS.length = 0; sel = null; playhead = 0;
-  projDir = null; projFile = null; projHandle = null; savedOnce = false; dirty = false;
+  projDir = null; projFile = null; projHandle = null; savedOnce = false; dirty = false; autoAt = 0; autoSig = ''; clearTimeout(autoT);
   $('#pname').value = S.name; applyFormat(); setView('board'); renderAll(); renderSaveState();
 }
 function closeProject() {
@@ -4401,7 +4490,7 @@ function closeProject() {
   if (!(dirty && (S.scenes.length || M.size))) { go(); return; }
   const dl = $('#closedlg'); dl.classList.add('show');
   dl.querySelector('#clSave').onclick = async () => { dl.classList.remove('show'); await saveProject(); if (!dirty) go(); };
-  dl.querySelector('#clDiscard').onclick = () => { dl.classList.remove('show'); go(); };
+  dl.querySelector('#clDiscard').onclick = () => { dl.classList.remove('show'); clearRecovery(S.pid); go(); };
   dl.querySelector('#clCancel').onclick = () => dl.classList.remove('show');
 }
 async function relinkOne(mid) {
@@ -4503,6 +4592,14 @@ function buildXML(names) {
       aclips1 += `<clipitem id="${aId}"><name>${xe(names.get(m.id))}</name><enabled>${v.mute ? 'FALSE' : 'TRUE'}</enabled><duration>${F(m.duration)}</duration>${SEQ_RATE}<start>${st}</start><end>${en}</end><in>${inF}</in><out>${outF}</out><file id="file-${m.id}"/><sourcetrack><mediatype>audio</mediatype><trackindex>1</trackindex></sourcetrack>${xmlLevel(v.vol)}${links}</clipitem>\n`;
     }
   }
+  // markers da sequência: um por cena, do início ao fim dela, com o nome e as notas do storyboard
+  let markers = ''; { let mt = 0;
+    S.scenes.forEach((sc, i) => {
+      const n = nOf(sc), st = F(mt), en = F(mt + sc.dur); mt += sc.dur;
+      const parts = [n.plano && 'SHOT: ' + n.plano, n.acao && 'ACTION: ' + n.acao, n.loc && 'VO: ' + n.loc].filter(Boolean);
+      if (isBlank(activeV(sc))) parts.unshift('NO IMAGE');
+      markers += `<marker><name>${xe(sceneName(i))}</name><comment>${xe(parts.join(' | ').replace(/\s+/g, ' '))}</comment><in>${st}</in><out>${Math.max(st + 1, en)}</out></marker>\n`;
+    }); }
   // trilhas de áudio
   let atracks = `<track>${aclips1}</track>\n`;
   for (const tr of S.tracks) {
@@ -4523,7 +4620,7 @@ function buildXML(names) {
 <duration>${tot}</duration>
 ${SEQ_RATE}
 <timecode>${SEQ_RATE}<string>00:00:00:00</string><frame>0</frame><displayformat>NDF</displayformat></timecode>
-<media>
+${markers}<media>
 <video>
 <format><samplecharacteristics>${SEQ_RATE}<width>${W}</width><height>${H}</height><pixelaspectratio>square</pixelaspectratio><fielddominance>none</fielddominance></samplecharacteristics></format>
 <track>
@@ -4758,7 +4855,7 @@ async function exportBoardPDF({ per = 6, notes = true, tcs = true } = {}) {
       await new Promise(r => setTimeout(r, 0));
     }
     if (cfg.end === 'image' && cfg.endImg) await fullImg(cfg.endImg, newPage());
-    progress(1, 'Montando o PDF…');
+    progress(1, 'Building the PDF…');
     const blob = doc.build();
     modal(true, 'Storyboard ready', `${nPages + (cfg.cover === 'auto' || (cfg.cover === 'image' && cfg.coverImg) ? 1 : 0) + (cfg.end === 'image' && cfg.endImg ? 1 : 0)} page(s) · ${(blob.size / 1048576).toFixed(1)} MB. Confirm the download.`);
     await saveFile(fileBase() + '_storyboard.pdf', blob);
@@ -4991,7 +5088,7 @@ function piDurations(fr, totalS) {
 }
 async function importPDF(file) {
   pause();
-  modal(true, 'Lendo PDF', file.name); $('#mCancel').style.display = 'none'; progress(0, 'Carregando o leitor de PDF…');
+  modal(true, 'Reading PDF', file.name); $('#mCancel').style.display = 'none'; progress(0, 'Loading the PDF reader…');
   const done = () => { modal(false); $('#mCancel').style.display = ''; };
   let lib; try { lib = await loadPdfJs(); } catch (e) { done(); toast('Could not load the PDF reader. It needs an internet connection the first time.', 6000); return; }
   try {
@@ -5360,7 +5457,7 @@ $('#sbSave').onclick = async () => {
   const sc = findScene(SB.sceneId); if (!sc) { closeSceneBuilder(); return; }
   const out = document.createElement('canvas'); out.width = SB.W; out.height = SB.H; sbCompose(out.getContext('2d'), false);
   const blob = await new Promise(r => out.toBlob(r, 'image/png'));
-  const idx = S.scenes.indexOf(sc), file = new File([blob], `drawing_scene${p2(idx + 1)}_${uid().slice(0, 4)}.png`, { type: 'image/png' });
+  const idx = S.scenes.indexOf(sc), file = new File([blob], `drawing_${String(sceneName(idx)).replace(/[\\/:*?"<>|\s]+/g, '_').slice(0, 40)}_${uid().slice(0, 4)}.png`, { type: 'image/png' });
   const doc = sbClone(sbDoc()), vid = SB.vid; closeSceneBuilder();
   const [r] = await importFiles([file], { folder: folderByName('Drawings').id }); if (!r) return;
   const m = M.get(r.id); if (m) m.pasted = true;
@@ -5497,7 +5594,7 @@ function encodeWAV(f32, sr) {
 let MIC = null, micIdle = 0;
 async function micGet() {
   if (MIC && MIC.stream.getAudioTracks().some(t => t.readyState === 'live')) { clearTimeout(micIdle); return MIC; }
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw Object.assign(new Error('sem microfone'), { name: 'NotFoundError' });
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw Object.assign(new Error('no microphone'), { name: 'NotFoundError' });
   const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } });
   MIC = { stream, src: actx.createMediaStreamSource(stream) }; return MIC;
 }
@@ -5598,7 +5695,7 @@ async function startRec() {
   REC = { io, state: 'count', at: snapF(playhead), from: Math.max(0, snapF(playhead) - PREROLL), t0: null, c0: null };
   let tip = false; try { tip = localStorage.getItem('am_rec_tip') === '1'; localStorage.setItem('am_rec_tip', '1'); } catch (e) { }
   if (!tip) toast('Tip: use headphones so the film sound does not leak into the mic.', 4500);
-  REC.state = 'rec'; $('#recStat').textContent = 'gravando'; recUI();
+  REC.state = 'rec'; $('#recStat').textContent = 'recording'; recUI();
   recLiveStart();
   seekQuiet(REC.from); await play();
   if (REC) { REC.t0 = t0; REC.c0 = c0; recMeter(); }
@@ -5612,14 +5709,14 @@ async function stopRec(cancel = false) {
   recUI(); recLiveEnd(R);
   if (cancel || R.state !== 'rec' || R.c0 == null) { seekQuiet(R.at); renderTimeline(); if (R.state === 'rec') toast('Recording canceled.', 1500); return; }
   const sr = actx.sampleRate, ch = R.io.chunks.filter(c => c && c.d && c.d.length && c.t >= R.c0 - PREROLL - 1);
-  if (!ch.length) { toast('Nada foi gravado. Confira o microfone.'); seekQuiet(R.at); return; }
+  if (!ch.length) { toast('Nothing was recorded. Check the microphone.'); seekQuiet(R.at); return; }
   const n = ch.reduce((a, c) => a + c.d.length, 0), data = new Float32Array(n); let o = 0; for (const c of ch) { data.set(c.d, o); o += c.d.length; }
   const lat = R.io.inLat + (actx.outputLatency || actx.baseLatency || 0);
   const firstSong = R.t0 + (ch[0].t - lat - R.c0);
   const cut = Math.max(0, Math.round((R.from - firstSong) * sr)), pcm = data.subarray(cut), fileSong = firstSong + cut / sr;
   if (pcm.length < sr * (R.at - R.from + 0.3)) { toast('The recording is too short.'); seekQuiet(R.at); return; }
   const num = (S.recCount = (S.recCount || 0) + 1);
-  const file = new File([encodeWAV(pcm, sr)], `loc_guia_${String(num).padStart(2, '0')}.wav`, { type: 'audio/wav' });
+  const file = new File([encodeWAV(pcm, sr)], `guide_vo_${String(num).padStart(2, '0')}.wav`, { type: 'audio/wav' });
   const [r] = await importFiles([file], { folder: folderByName('Voice-over').id }); if (!r) return;
   const m = M.get(r.id); if (m) { m.pasted = true; }
   pushUndo();
@@ -5768,7 +5865,7 @@ function pxRefresh() {
   if (!PX) return; const { on, d } = pxDurations(), idx = new Map(on.map((p, k) => [p, k]));
   PX.plan.forEach((p, k) => {
     const el = document.querySelector(`.pxcard[data-k="${k}"]`); el.classList.toggle('off', !p.on);
-    const j = idx.get(p); el.querySelector('.pxdur').innerHTML = p.on ? fmtS(d[j]) + (p.n.dur > 0 ? ' ' + lockSvg : '') : 'fora';
+    const j = idx.get(p); el.querySelector('.pxdur').innerHTML = p.on ? fmtS(d[j]) + (p.n.dur > 0 ? ' ' + lockSvg : '') : 'off';
     el.querySelector('.pxdur').title = p.n.dur > 0 ? 'Locked time: the slide’s “advance after” setting' : '';
   });
   const tot = d.reduce((a, b) => a + b, 0);
@@ -5951,7 +6048,7 @@ function renderAll() { renderSaveState(); renderStat(); renderBin(); renderBoard
 
 $('#fmt').onclick = e => { const b = e.target.closest('button'); if (!b || b.dataset.f === S.format) return; pushUndo(); S.format = b.dataset.f; applyFormat(); renderAll(); };
 $('#modesel').onclick = e => { const b = e.target.closest('button'); if (b && b.dataset.v !== view) setView(b.dataset.v); };
-$('#pname').oninput = e => { S.name = e.target.value; if (!dirty) setDirty(true); };
+$('#pname').oninput = e => { S.name = e.target.value; if (!dirty) setDirty(true); else scheduleAutosave(); };
 $('#pname').onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') e.target.blur(); };
 $('#cardSize').oninput = e => { cardW = +e.target.value; renderBoard(); };
 function zoomToFit() {
