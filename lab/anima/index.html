@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Animov Studio
-  v0.14.2 · build 023 · 2026-11-15
+  v0.14.5 · build 026 · 2026-11-16
   André Ávila · avila.mov
 -->
 <html lang="en">
@@ -1078,6 +1078,13 @@ header{border-bottom:0;padding:0 10px 0 12px;gap:12px}
 .hclose:hover{background:var(--raised);color:var(--text)}
 .hwelcome{font-size:36px;margin:28px 0 10px}
 .hrecent{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+
+/* v0.14.4 · trilha de música sem botão de gravar: espaço vazio do mesmo tamanho, para alinhar o M */
+.hrow .tarm-off{width:24px;height:24px;flex:none}
+
+/* v0.14.5 · o menu Import abre por cima dos outros painéis (o painel de mídia não corta mais o menu) */
+#bin{overflow:visible;position:relative;z-index:6}
+#binlist{border-radius:0 0 12px 12px}
 </style>
 </head>
 <body>
@@ -3296,7 +3303,7 @@ if (LANG !== 'en') document.addEventListener('DOMContentLoaded', () => {
     .observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['title', 'placeholder'] });
 });
 /* versão e novidades da tela inicial: atualize a cada entrega (só features novas; "Bugs fixed" fecha a lista) */
-const APP = { name: 'Animov Studio', version: '0.14.2', build: 23, date: '2026-11-15' };
+const APP = { name: 'Animov Studio', version: '0.14.5', build: 26, date: '2026-11-16' };
 console.log(`${APP.name} v${APP.version} (b${APP.build})`);
 /* "What's new" da tela inicial: só o que é útil e atrativo para quem usa (do mais novo para o mais antigo), fechando com "Bugs fixed".
    O registro técnico completo fica no CHANGELOG. */
@@ -4378,7 +4385,7 @@ function renderTimeline() {
   // cabeçalhos + áudio
   const heads = $('#tlheads');
   heads.innerHTML = `<div class="hrow h-ruler"></div><div class="hrow h-v"><span class="lbl">Video</span></div>` +
-    S.tracks.map((tr, i) => `<div class="hrow h-a ${trAttached(tr) ? 'att' : 'music'}" data-tkid="${tr.id}"><i class="tdot"></i><span class="lbl tnm" data-rntrack="${tr.id}" title="${esc(trName(tr))} · ${trAttached(tr) ? 'goes with its scenes (moves, trims, deletes)' : 'free in time: does not move with the scenes'}. Double-click to rename, right-click to change the type.">${esc(trName(tr))}</span><button class="tarm${S.armTrack === tr.id ? ' on' : ''}" data-armtrack="${tr.id}" title="${S.armTrack === tr.id ? 'Armed: R records here. Click to disarm.' : 'Arm for recording: R records on this track'}"></button><button class="tmute${tr.mute ? ' on' : ''}" data-mutetrack="${tr.id}" title="${tr.mute ? 'Track muted. Click to hear it again.' : 'Mute this track'}">M</button><button class="x" data-rmtrack="${tr.id}" title="Remove track">×</button></div>`).join('') +
+    S.tracks.map((tr, i) => `<div class="hrow h-a ${trAttached(tr) ? 'att' : 'music'}" data-tkid="${tr.id}"><i class="tdot"></i><span class="lbl tnm" data-rntrack="${tr.id}" title="${esc(trName(tr))} · ${trAttached(tr) ? 'goes with its scenes (moves, trims, deletes)' : 'free in time: does not move with the scenes'}. Double-click to rename, right-click to change the type.">${esc(trName(tr))}</span>${trKind(tr) === 'music' ? '<i class="tarm-off"></i>' : `<button class="tarm${S.armTrack === tr.id ? ' on' : ''}" data-armtrack="${tr.id}" title="${S.armTrack === tr.id ? 'Armed: R records here. Click to disarm.' : 'Arm for recording: R records on this track'}"></button>`}<button class="tmute${tr.mute ? ' on' : ''}" data-mutetrack="${tr.id}" title="${tr.mute ? 'Track muted. Click to hear it again.' : 'Mute this track'}">M</button><button class="x" data-rmtrack="${tr.id}" title="Remove track">×</button></div>`).join('') +
     `<button class="addtrack" id="bAddTrack">${ico('plus')}Audio track</button>`;
   const at = $('#atracks'), lk = linkedIds();
   const trEls = [...at.children];
@@ -5114,10 +5121,10 @@ function trackCtx(e, tid) {
   const tr = S.tracks.find(t => t.id === tid); if (!tr) return; const kd = trKind(tr);
   openCtx(e.clientX, e.clientY, trName(tr), [
     { label: 'Rename', icon: 'pen', act: () => renameTrack(tid) },
-    { label: S.armTrack === tid ? 'Disarm recording' : 'Arm for recording (R)', icon: 'mic', act: () => { pushUndo(); S.armTrack = S.armTrack === tid ? null : tid; renderTimeline(); } },
+    ...(trKind(tr) === 'music' ? [] : [{ label: S.armTrack === tid ? 'Disarm recording' : 'Arm for recording (R)', icon: 'mic', act: () => { pushUndo(); S.armTrack = S.armTrack === tid ? null : tid; renderTimeline(); } }]),
     { label: tr.mute ? 'Unmute track' : 'Mute track', icon: tr.mute ? 'speaker' : 'mute', act: () => toggleTrackMute(tid) },
     { head: 'Type' },
-    ...['vo', 'sfx', 'scene', 'music'].map(k => ({ label: TK_LONG[k] + (k === kd ? '  ✓' : ''), icon: k === 'music' ? 'speaker' : 'film', act: () => { if (k === kd) return; pushUndo(); const was = trName(tr); if (tr.name && tr.name.trim() === TK[kd]) delete tr.name; tr.kind = k; delete tr.sync; renderAll(); toast(`${was} is now ${TK[k]}: ${k === 'music' ? 'free in time.' : 'goes with its scenes.'}`, 2200); } })),
+    ...['vo', 'sfx', 'scene', 'music'].map(k => ({ label: TK_LONG[k] + (k === kd ? '  ✓' : ''), icon: k === 'music' ? 'speaker' : 'film', act: () => { if (k === kd) return; pushUndo(); const was = trName(tr); if (tr.name && tr.name.trim() === TK[kd]) delete tr.name; tr.kind = k; delete tr.sync; if (k === 'music' && S.armTrack === tid) S.armTrack = null; renderAll(); toast(`${was} is now ${TK[k]}: ${k === 'music' ? 'free in time.' : 'goes with its scenes.'}`, 2200); } })),
     '-',
     { label: 'Remove track', icon: 'close', danger: true, act: () => { pushUndo(); S.tracks.splice(S.tracks.indexOf(tr), 1); renderAll(); restartIfPlaying(); } }
   ]);
@@ -7683,16 +7690,35 @@ function recMeter() {
   requestAnimationFrame(recMeter);
 }
 /* forma de onda crescendo na trilha durante a gravação */
+/* Regra da gravação (v0.14.3): com uma trilha armada, grava nela (se já houver uma gravação começando no mesmo ponto, vira um take novo dela;
+   se houver outro áudio embaixo, a gravação substitui esse trecho, como o overwrite do Premiere). Sem trilha armada, grava numa trilha VO nova.
+   Trilhas de música não podem ser armadas (v0.14.4). */
+function recArmed() { const t = S.tracks.find(t => t.id === S.armTrack); return t && trKind(t) !== 'music' ? t : null; } // trilha de música não grava (v0.14.4)
 function recPickTrack(at) {
-  for (const tr of S.tracks) for (const c of tr.clips) if (c.rec && Math.abs(c.start - at) < 0.3) return { tr, take: c };
-  let tr = S.tracks.find(t => !t.clips.some(c => c.start < at + 0.5 && c.start + c.out - c.in > at + 1e-3));
-  if (!tr) { tr = { id: uid(), clips: [], _tmp: true }; S.tracks.push(tr); renderTimeline(); }
+  const armed = recArmed();
+  if (armed) return { tr: armed, take: armed.clips.find(c => c.rec && Math.abs(c.start - at) < 0.3) || null };
+  const tr = { id: uid(), kind: 'vo', clips: [], _tmp: true }, k = S.tracks.findIndex(t => trKind(t) === 'music');
+  if (k < 0) S.tracks.push(tr); else S.tracks.splice(k, 0, tr); renderTimeline();
   return { tr, take: null };
+}
+/* abre espaço na trilha entre a e b: apaga, corta ou divide o que estiver embaixo. Devolve quantos clipes mudaram. */
+function overwriteRange(tr, a, b) {
+  let n = 0; const add = [];
+  tr.clips = tr.clips.filter(c => {
+    const cs = c.start, ce = c.start + c.out - c.in;
+    if (ce <= a + 1e-3 || cs >= b - 1e-3) return true;
+    n++;
+    if (cs >= a - 1e-3 && ce <= b + 1e-3) return false;
+    if (cs < a && ce > b) { const r = { ...c, id: uid(), start: b, in: c.in + (b - cs) }; delete r.takes; add.push(r); c.out = c.in + (a - cs); return true; }
+    if (cs < a) { c.out = c.in + (a - cs); return true; }
+    c.in += b - cs; c.start = b; return true;
+  });
+  tr.clips.push(...add); return n;
 }
 function recLiveStart() {
   const R = REC, pk = recPickTrack(R.at); R.trackId = pk.tr.id; R.takeOf = pk.take ? pk.take.id : null; R.drawn = 0;
   const el = document.createElement('div'); el.className = 'aclip reclive';
-  el.innerHTML = `<canvas></canvas><div class="al">● RECORDING${pk.take ? ' · TAKE ' + ((pk.take.takes ? pk.take.takes.length : 1) + 1) : ''}</div>`;
+  el.innerHTML = `<canvas></canvas><div class="al">● Recording${pk.take ? ' · Take ' + ((pk.take.takes ? pk.take.takes.length : 1) + 1) : ''}</div>`;
   R.liveEl = el; R.liveCv = el.querySelector('canvas');
 }
 function recLiveDraw() {
@@ -7763,18 +7789,20 @@ async function stopRec(cancel = false) {
   const m = M.get(r.id); if (m) { m.pasted = true; }
   pushUndo();
   const inS = Math.max(0, R.at - fileSong), start = snapF(Math.max(R.at, fileSong)), out = m.duration, len = out - inS;
-  let hit = null; for (const tr of S.tracks) for (const c of tr.clips) if (c.rec && (R.takeOf ? c.id === R.takeOf : Math.abs(c.start - start) < 0.3)) hit = { c, tr };
+  let hit = null; if (R.takeOf) for (const tr of S.tracks) for (const c of tr.clips) if (c.id === R.takeOf) hit = { c, tr };
   let msg;
   if (hit) {
     const c = hit.c; if (!c.takes) c.takes = [{ media: c.media, in: c.in, out: c.out }];
     c.takes.push({ media: r.id, in: inS, out }); Object.assign(c, { media: r.id, in: inS, out, start, mute: false });
     msel.clear(), sel = { type: 'clip', id: c.id }; msg = `Take ${c.takes.length} recorded on ${trName(hit.tr)}. Other takes are in the Inspector.`;
   } else {
-    const free = t => !t.clips.some(c => c.start < start + len - 1e-3 && c.start + c.out - c.in > start + 1e-3);
-    const armed = S.tracks.find(t => t.id === S.armTrack); let tr = armed && free(armed) ? armed : null;
-    if (!tr) { tr = newTrack('vo'); const k = S.tracks.findIndex(t => trKind(t) === 'music'); if (k < 0) S.tracks.push(tr); else S.tracks.splice(k, 0, tr); }
+    const armed = recArmed(); let tr = armed, cut = 0;
+    if (tr) cut = overwriteRange(tr, start, start + len);
+    else { tr = newTrack('vo'); const k = S.tracks.findIndex(t => trKind(t) === 'music'); if (k < 0) S.tracks.push(tr); else S.tracks.splice(k, 0, tr); }
     const c = { id: uid(), media: r.id, start, in: inS, out, vol: 1, rec: true }; tr.clips.push(c);
-    msel.clear(), sel = { type: 'clip', id: c.id }; msg = `Voice-over recorded on ${trName(tr)}${armed && armed !== tr ? ` (the armed track had audio there, so a new track was made)` : !armed ? ' (new track: arm a track to record on it)' : ''}. To record again, press R here.`;
+    msel.clear(), sel = { type: 'clip', id: c.id };
+    msg = armed ? `Voice-over recorded on ${trName(tr)}.${cut ? ' It replaced the audio that was there (Ctrl+Z brings it back).' : ''} Press R here again for a new take.`
+      : `Voice-over recorded on a new track, ${trName(tr)}. To record on a track you choose, arm it first (round button on the track).`;
   }
   playhead = R.at; renderAll(); updatePlayheadUI();
   toast(msg + (view !== 'timeline' ? ' See it in the Timeline.' : ''), 5000);
