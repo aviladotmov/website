@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Animov Studio
-  v0.14.5 · build 026 · 2026-11-16
+  v0.15.2 · build 031 · 2026-11-16
   André Ávila · avila.mov
 -->
 <html lang="en">
@@ -1167,7 +1167,7 @@ header{border-bottom:0;padding:0 10px 0 12px;gap:12px}
   <h3>Export XML</h3>
   <p>For Premiere Pro or DaVinci Resolve. Keeps the cuts, slip, volume, framing and animations. Blank cards become a NO-IMAGE frame with the scene name and notes.</p>
   <label class="opt"><input type="radio" name="xo" value="copy" checked><div><b>Copy media too <em>(recommended)</em></b><span>Copies all files next to the XML, in a FOOTAGE folder. Makes relinking easy.</span></div></label>
-  <label class="opt"><input type="radio" name="xo" value="xml"><div><b>XML only</b><span>You will need to relink every file by hand.</span></div></label>
+  <label class="opt"><input type="radio" name="xo" value="xml"><div><b>XML only</b><span>Also copies the files stored inside the project (pasted, drawings, recordings). Videos and other linked files need relinking by hand.</span></div></label>
   <div class="psec" style="margin-top:14px"><span class="lbl">Notes in the XML</span><p class="hint" style="margin:6px 0 0">On-screen texts go on V2 as images; dissolves, dips and fades go along. Your timeline markers become sequence markers.</p>
     <div class="seg" id="xmlNotes" style="margin-top:8px"><button data-xn="off">Off</button><button data-xn="markers">Markers</button><button data-xn="overlay">Overlay (V2)</button><button data-xn="both">Markers + overlay</button></div>
     <p class="hint" id="xmlNotesHint" style="margin:8px 0 4px"></p>
@@ -1237,7 +1237,7 @@ header{border-bottom:0;padding:0 10px 0 12px;gap:12px}
     <div class="hbrand"><svg class="mark" viewBox="0 0 96 96" aria-hidden="true"><rect x="6" y="30" width="26" height="36" rx="6" fill="#5f5f64"/><rect x="36" y="30" width="26" height="36" rx="6" fill="#9b9ba1"/><rect x="66" y="22" width="26" height="52" rx="7" fill="#ff5b24"/><path d="M75 40l10 8-10 8z" fill="#1a0c06"/></svg><span><b>Animov</b> Studio</span><span class="hbeta">Beta</span><span class="hver" id="hVer"></span></div>
     <h2 class="hwelcome">Build the story<br>before the edit.</h2>
     <p class="hsub">From storyboard to animatic, in your browser. Nothing is uploaded: your files stay on your computer.</p>
-    <div class="hwarn"><b>Work in progress.</b> This app is in development and may have bugs. Back up your files, and <a href="https://avila.mov" target="_blank" rel="noopener">get in touch</a> if you need help.</div>
+    <div class="hwarn"><b>Work in progress.</b> This app is in development and may have bugs. Back up your files, and <a href="#" id="hFeedback">send feedback</a> if you need help or find a bug.<br><b>Works best in Google Chrome.</b> Other browsers may block some features, like exporting the XML to a folder.</div>
     <div id="homeRecov"></div>
     <div class="hrechead"><span class="lbl">Recent</span></div>
     <div id="homeRecent" class="hrecent"></div>
@@ -1258,6 +1258,17 @@ header{border-bottom:0;padding:0 10px 0 12px;gap:12px}
 <div id="mediadlg" class="ovl"><div class="mbox">
   <h3 id="mdTitle">Media offline</h3><p id="mdText"></p><div class="mdl" id="mdList"></div>
   <div class="mrow" style="margin-top:16px"><button class="btn" id="mdLater" title="Keep working. The files stay marked in red until you relink them.">Continue offline</button><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn" id="mdAllow">Reconnect</button><button class="btn" id="mdFiles">Locate files…</button><button class="btn primary" id="mdPick">Search a folder…</button></div></div>
+</div></div>
+<div id="fbdlg" class="ovl"><div class="mbox" style="width:min(520px,94vw)">
+  <h3>Send feedback</h3>
+  <p>Found a bug, have an idea or a question? Your message goes straight to the Animov team.</p>
+  <div class="seg" id="fbType" style="margin:14px 0 12px;flex-wrap:wrap"><button data-t="bug">Something isn’t working</button><button data-t="idea">Idea or suggestion</button><button data-t="q">Question / need help</button></div>
+  <textarea class="tin" id="fbText" rows="6" placeholder="Tell us what happened. For a bug: what were you doing, and what did you expect?"></textarea>
+  <input class="tin" id="fbEmail" type="email" placeholder="Your email (only if you’d like a reply)" spellcheck="false">
+  <label class="chk" id="fbOkRow" style="margin-top:2px"><input type="checkbox" id="fbOk" checked> You can email me with follow-up questions</label>
+  <p class="hint" id="fbInfo" style="margin-top:12px"></p>
+  <p id="fbErr" style="color:var(--accent2);margin-top:8px;display:none"></p>
+  <div class="mrow" style="margin-top:18px"><a href="#" class="tlink" id="fbMail"></a><div style="display:flex;gap:8px"><button class="btn" id="fbCancel">Cancel</button><button class="btn primary" id="fbSend">Send</button></div></div>
 </div></div>
 <div id="askdlg" class="ovl"><div class="mbox" style="width:min(460px,92vw)">
   <h3 id="askT"></h3><p id="askP"></p>
@@ -3303,7 +3314,7 @@ if (LANG !== 'en') document.addEventListener('DOMContentLoaded', () => {
     .observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['title', 'placeholder'] });
 });
 /* versão e novidades da tela inicial: atualize a cada entrega (só features novas; "Bugs fixed" fecha a lista) */
-const APP = { name: 'Animov Studio', version: '0.14.5', build: 26, date: '2026-11-16' };
+const APP = { name: 'Animov Studio', version: '0.15.2', build: 31, date: '2026-11-16' };
 console.log(`${APP.name} v${APP.version} (b${APP.build})`);
 /* "What's new" da tela inicial: só o que é útil e atrativo para quem usa (do mais novo para o mais antigo), fechando com "Bugs fixed".
    O registro técnico completo fica no CHANGELOG. */
@@ -6381,8 +6392,72 @@ function menuItems(name) {
     it('Zoom to fit', 'fit', () => { setView('timeline'); zoomToFit(); })];
   return [
     it('How it works', 'info', () => openHelp()), it('Open the example project', 'film', () => confirmLeave(() => openExample())), it('Keyboard shortcuts', 'info', () => openHelp('#helpKeys')), it("What's new", 'info', () => openHelp('#helpNews')),
-    '-', it('Contact (avila.mov)', 'open', () => window.open('https://avila.mov', '_blank', 'noopener'))];
+    '-', it('Send feedback or report a bug…', 'open', () => openFeedback()), it('Email: ' + FEEDBACK.email, 'open', () => mailFeedback()),
+    it('Contact (avila.mov)', 'open', () => window.open('https://avila.mov', '_blank', 'noopener'))];
 }
+/* v0.15.0 · canal de suporte (formulário do Google). v0.15.2 · a pessoa escreve numa janela do próprio app e o app
+   envia as respostas para o formulário (formResponse, modo no-cors). O Google não devolve confirmação: "enviado" quer
+   dizer que a internet funcionou. Os textos das opções precisam ser IGUAIS aos do formulário; se mudar uma pergunta
+   ou opção lá, atualizar aqui. Versão e navegador vão nos campos App version e Browser, sem a pessoa ver. */
+const FEEDBACK = {
+  action: 'https://docs.google.com/forms/d/e/1FAIpQLSdc-HeDT5xuUjEZYwThJ-M93yySGaMxewBDlNsTwIH3yWcAoA/formResponse',
+  email: 'animov@avila.mov',
+  entry: { type: 'entry.1251780852', text: 'entry.769315185', email: 'entry.890838161', ok: 'entry.48403047', version: 'entry.783323403', browser: 'entry.1023922961' },
+  types: { bug: 'Something isn\u2019t working (bug)', idea: 'Idea or suggestion', q: 'Question / need help' },
+  yes: 'Yes, you can email me with follow-up questions.', no: 'No.'
+};
+function browserInfo() {
+  const ua = navigator.userAgent, m = (re) => (ua.match(re) || [])[1];
+  const b = m(/OPR\/([\d.]+)/) ? 'Opera ' + m(/OPR\/([\d.]+)/) : m(/Edg\/([\d.]+)/) ? 'Edge ' + m(/Edg\/([\d.]+)/) : m(/Firefox\/([\d.]+)/) ? 'Firefox ' + m(/Firefox\/([\d.]+)/)
+    : m(/Chrome\/([\d.]+)/) ? 'Chrome ' + m(/Chrome\/([\d.]+)/) : m(/Version\/([\d.]+).*Safari/) ? 'Safari ' + m(/Version\/([\d.]+).*Safari/) : 'Unknown browser';
+  const os = /Windows/.test(ua) ? 'Windows' : /Mac OS X/.test(ua) ? 'macOS' : /Android/.test(ua) ? 'Android' : /iPhone|iPad/.test(ua) ? 'iOS' : /Linux/.test(ua) ? 'Linux' : 'Unknown OS';
+  return `${b} · ${os}`;
+}
+function appVer() { return `${APP.version} · b${String(APP.build).padStart(3, '0')}`; }
+function mailFeedback() { location.href = 'mailto:' + FEEDBACK.email + '?subject=' + encodeURIComponent('Animov Studio v' + APP.version); }
+const FB = { type: 'bug', sending: false };
+function fbUpd() {
+  $('#fbType').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.t === FB.type));
+  const hasMail = /\S+@\S+\.\S+/.test($('#fbEmail').value.trim());
+  $('#fbOkRow').style.display = hasMail ? '' : 'none';
+  $('#fbSend').disabled = FB.sending || !$('#fbText').value.trim();
+  $('#fbSend').textContent = FB.sending ? 'Sending…' : 'Send';
+}
+function openFeedback(type) {
+  if (type) FB.type = type;
+  $('#fbInfo').textContent = `Sent with the app version (${appVer()}) and your browser (${browserInfo()}), to help us find the problem.`;
+  $('#fbMail').textContent = 'Prefer email? ' + FEEDBACK.email;
+  $('#fbErr').style.display = 'none'; fbUpd();
+  $('#fbdlg').classList.add('show'); setTimeout(() => $('#fbText').focus(), 30);
+}
+function closeFeedback() { if (!FB.sending) $('#fbdlg').classList.remove('show'); } // o texto fica guardado até enviar
+async function sendFeedback() {
+  const text = $('#fbText').value.trim(); if (!text || FB.sending) return;
+  const mail = $('#fbEmail').value.trim(), hasMail = /\S+@\S+\.\S+/.test(mail), E = FEEDBACK.entry;
+  const body = new URLSearchParams();
+  body.append(E.type, FEEDBACK.types[FB.type]); body.append(E.text, text);
+  if (hasMail) { body.append(E.email, mail); body.append(E.ok, $('#fbOk').checked ? FEEDBACK.yes : FEEDBACK.no); }
+  body.append(E.version, appVer()); body.append(E.browser, browserInfo());
+  FB.sending = true; fbUpd(); $('#fbErr').style.display = 'none';
+  try {
+    await fetch(FEEDBACK.action, { method: 'POST', mode: 'no-cors', body });
+    FB.sending = false; $('#fbText').value = ''; $('#fbdlg').classList.remove('show'); fbUpd();
+    toast('Thanks! Your message was sent.', 3600);
+  } catch (err) {
+    FB.sending = false; fbUpd();
+    const er = $('#fbErr'); er.textContent = `Couldn’t send. Check your internet connection and try again, or email ${FEEDBACK.email}.`; er.style.display = '';
+  }
+}
+$('#fbType').onclick = e => { const b = e.target.closest('button'); if (b) { FB.type = b.dataset.t; fbUpd(); } };
+$('#fbText').oninput = fbUpd; $('#fbEmail').oninput = fbUpd;
+$('#fbSend').onclick = sendFeedback; $('#fbCancel').onclick = closeFeedback;
+$('#fbMail').onclick = e => { e.preventDefault(); mailFeedback(); };
+$('#fbdlg').onclick = e => { if (e.target.id === 'fbdlg') closeFeedback(); };
+$('#fbdlg').addEventListener('keydown', e => {
+  e.stopPropagation();
+  if (e.key === 'Escape') closeFeedback();
+  else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) sendFeedback();
+});
 function openMenu(name, btn) {
   const its = menuItems(name); fm._acts = [];
   fm.innerHTML = its.map(x => {
@@ -6644,25 +6719,36 @@ async function exportXML() {
   const { xml, gaps, blanks, trFall } = buildXML(names, ph, { markers: xn === 'markers' || xn === 'both', overlay: np, supers: sp });
   const bnote = (blanks ? ` ${blanks} blank card${blanks > 1 ? 's became NO-IMAGE frames' : ' became a NO-IMAGE frame'}.` : '') + (trFall ? ` ${trFall} dissolve${trFall > 1 ? 's' : ''} became cuts: the videos have no extra frames around the cut.` : '');
   const base = fileBase();
-  const toCopy = (copy ? used.filter(m => m.file && !m.offline) : []).concat([...ph.values()], [...sp.values()], [...np.values()]);
+  /* v0.14.7: no "XML only" também vão para a FOOTAGE as mídias guardadas dentro do .animov (mesma regra do salvar: coladas, desenhos,
+     locuções, quadros de PDF/PPTX, imagens e áudios até 40 MB). Elas não existem como arquivo no disco; sem isso ficariam offline no Premiere. */
+  const toCopy = used.filter(m => m.file && !m.offline && (copy || embeddable(m))).concat([...ph.values()], [...sp.values()], [...np.values()]);
   if (folderOK) {
-    try {
-      const d = await window.showDirectoryPicker({ id: 'animatic-xml', mode: 'readwrite', startIn: projDir || 'documents' });
-      if (!(await ensurePerm(d))) return;
-      await writeFile(d, base + '.xml', xml);
-      if (toCopy.length) {
-        modal(true, 'Copying media', 'Copying files to the FOOTAGE folder…'); $('#mCancel').style.display = 'none';
-        const fd = await d.getDirectoryHandle('FOOTAGE', { create: true });
-        for (let i = 0; i < toCopy.length; i++) { progress(i / toCopy.length, `${i + 1} of ${toCopy.length}`); await writeFile(fd, names.get(toCopy[i].id), toCopy[i].file); }
-        modal(false); $('#mCancel').style.display = '';
-      }
-      toast(`XML exported to "${d.name}"${toCopy.length ? ' with a FOOTAGE folder' : ''}.${gaps ? ` ${gaps} scene${gaps > 1 ? 's' : ''} with short media end${gaps > 1 ? '' : 's'} with a gap.` : ''}${bnote}`, 5500);
-      return;
-    } catch (e) {
-      modal(false); $('#mCancel').style.display = '';
+    /* v0.14.6: nunca falha em silêncio. Se o navegador (ex.: Opera) não deixar gravar na pasta escolhida,
+       avisa o motivo e baixa o XML como .zip. Só cancelar a escolha da pasta encerra sem aviso. */
+    let d = null;
+    try { d = await window.showDirectoryPicker({ id: 'animatic-xml', mode: 'readwrite', startIn: projDir || 'documents' }); }
+    catch (e) {
       if (e && e.name === 'AbortError') return;
-      if (!(e && (e.name === 'SecurityError' || e.name === 'NotAllowedError' || e.name === 'TypeError'))) { console.error(e); toast('XML export error: ' + (e.message || e), 5000); return; }
-      folderOK = false; setupFileMenu();
+      console.warn('XML export: folder picker failed', e);
+      if (e && (e.name === 'SecurityError' || e.name === 'TypeError')) { folderOK = false; setupFileMenu(); }
+    }
+    if (d) {
+      try {
+        if (!(await ensurePerm(d))) throw Object.assign(new Error('the browser did not allow editing files in this folder'), { name: 'NotAllowedError' });
+        await writeFile(d, base + '.xml', xml);
+        if (toCopy.length) {
+          modal(true, 'Copying media', 'Copying files to the FOOTAGE folder…'); $('#mCancel').style.display = 'none';
+          const fd = await d.getDirectoryHandle('FOOTAGE', { create: true });
+          for (let i = 0; i < toCopy.length; i++) { progress(i / toCopy.length, `${i + 1} of ${toCopy.length}`); await writeFile(fd, names.get(toCopy[i].id), toCopy[i].file); }
+          modal(false); $('#mCancel').style.display = '';
+        }
+        toast(`XML exported to "${d.name}"${toCopy.length ? ' with a FOOTAGE folder' : ''}.${gaps ? ` ${gaps} scene${gaps > 1 ? 's' : ''} with short media end${gaps > 1 ? '' : 's'} with a gap.` : ''}${bnote}`, 5500);
+        return;
+      } catch (e) {
+        modal(false); $('#mCancel').style.display = '';
+        console.error('XML export: could not write to the folder', e);
+        toast(`Could not save in "${d.name}" (${(e && (e.message || e.name)) || e}). Downloading the XML as a .zip instead.`, 7000);
+      }
     }
   }
   const files = [{ name: `${base}/${base}.xml`, data: new TextEncoder().encode(xml) }];
@@ -8065,6 +8151,7 @@ $('#bProjCfg').onclick = () => openProjDlg();
 $('#bFileInfo').onclick = () => openHelp('#helpFiles');
 $('#offFix').onclick = () => openMediaDlg([]);
 $('#hHelp').onclick = () => { hideHome(); openHelp(); };
+$('#hFeedback').onclick = e => { e.preventDefault(); openFeedback(); };
 
 /* ---------------- sequência de imagens numeradas → storyboard ---------------- */
 let SEQ = null;
