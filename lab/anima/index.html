@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Animov Studio
-  v0.15.2 · build 031 · 2026-11-16
+  v0.15.3 · build 032 · 2026-11-21
   André Ávila · avila.mov
 -->
 <html lang="en">
@@ -3314,7 +3314,7 @@ if (LANG !== 'en') document.addEventListener('DOMContentLoaded', () => {
     .observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['title', 'placeholder'] });
 });
 /* versão e novidades da tela inicial: atualize a cada entrega (só features novas; "Bugs fixed" fecha a lista) */
-const APP = { name: 'Animov Studio', version: '0.15.2', build: 31, date: '2026-11-16' };
+const APP = { name: 'Animov Studio', version: '0.15.3', build: 32, date: '2026-11-21' };
 console.log(`${APP.name} v${APP.version} (b${APP.build})`);
 /* "What's new" da tela inicial: só o que é útil e atrativo para quem usa (do mais novo para o mais antigo), fechando com "Bugs fixed".
    O registro técnico completo fica no CHANGELOG. */
@@ -5689,10 +5689,14 @@ function pastedUrls(html, txt, hasFile) {
   return [...new Set(pref)].slice(0, 4);
 }
 async function fetchMedia(urls) {
-  for (const u of urls) {
+  /* v0.15.3 · sem Referer: alguns sites só entregam o arquivo original quando o pedido não diz de que site vem
+     (no app local isso já acontecia; no app online, o navegador mandava o endereço do site e eles recusavam).
+     Link http:// vira https:// antes (página https não pode baixar http); o http fica como segunda tentativa. */
+  const list = []; for (const u of urls) { if (/^http:/i.test(u)) list.push(u.replace(/^http:/i, 'https:')); list.push(u); }
+  for (const u of [...new Set(list)]) {
     const ac = new AbortController(), to = setTimeout(() => ac.abort(), 20000);
     try {
-      const r = await fetch(u, { mode: 'cors', credentials: 'omit', signal: ac.signal });
+      const r = await fetch(u, { mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer', signal: ac.signal });
       if (!r.ok) continue;
       const buf = new Uint8Array(await r.arrayBuffer()); const kind = sniffMedia(buf); if (!kind) continue;
       const id = giphyId(u); let base = id ? 'giphy_' + id : decodeURIComponent(new URL(u).pathname.split('/').filter(Boolean).pop() || 'pasted');
